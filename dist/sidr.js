@@ -4,9 +4,25 @@
 (function () {
 'use strict';
 
-var sidrStatus = {
-  moving: false,
-  opened: false
+var defaultOptions = {
+  name: 'sidr', // Name for the 'sidr'
+  speed: 200, // Accepts standard jQuery effects speeds (i.e. fast, normal or milliseconds)
+  side: 'left', // Accepts 'left' or 'right'
+  source: null, // Override the source of the content.
+  renaming: true, // The ids and classes will be prepended with a prefix when loading existent content
+  body: 'body', // Page container selector,
+  displace: true, // Displace the body content or not
+  timing: 'ease', // Timing function for CSS transitions
+  method: 'toggle', // The method to call when element is clicked
+  bind: 'click', // The event to trigger the menu
+  onOpen: function onOpen() {},
+  // Callback when sidr start opening
+  onClose: function onClose() {},
+  // Callback when sidr start closing
+  onOpenEnd: function onOpenEnd() {},
+  // Callback when sidr end opening
+  onCloseEnd: function onCloseEnd() {} // Callback when sidr end closing
+
 };
 
 var store = {};
@@ -19,40 +35,6 @@ var store$1 = {
     return store[key];
   }
 };
-
-var getMethod = function getMethod(methodName) {
-  return function (name, callback) {
-    // Check arguments
-    if (typeof name === 'function') {
-      callback = name;
-      name = 'sidr';
-    } else if (!name) {
-      name = 'sidr';
-    }
-
-    var menu = store$1.get(name);
-    menu[methodName](callback);
-  };
-};
-
-var methods = {};
-var publicMethods = ['open', 'close', 'toggle', 'reload'];
-for (var i = 0; i < publicMethods.length; i++) {
-  var methodName = publicMethods[i];
-  methods[methodName] = getMethod(methodName);
-}
-
-function runner(method) {
-  if (method === 'status') {
-    return sidrStatus;
-  } else if (methods[method]) {
-    return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-  } else if (typeof method === 'function' || typeof method === 'string' || !method) {
-    return methods.toggle.apply(this, arguments);
-  } else {
-    console.error('Method ' + method + ' does not exist on sidr');
-  }
-}
 
 var utils = {
   // Check for valids urls
@@ -463,6 +445,11 @@ var Body = function (_BaseElement) {
   return Body;
 }(BaseElement);
 
+var sidrStatus = {
+  moving: false,
+  opened: false
+};
+
 var Menu = function (_BaseElement) {
   inherits(Menu, _BaseElement);
 
@@ -652,6 +639,40 @@ var Menu = function (_BaseElement) {
   return Menu;
 }(BaseElement);
 
+var getMethod = function getMethod(methodName) {
+  return function (name, callback) {
+    // Check arguments
+    if (typeof name === 'function') {
+      callback = name;
+      name = 'sidr';
+    } else if (!name) {
+      name = 'sidr';
+    }
+
+    var menu = store$1.get(name);
+    menu[methodName](callback);
+  };
+};
+
+var methods = {};
+var publicMethods = ['open', 'close', 'toggle', 'reload'];
+for (var i = 0; i < publicMethods.length; i++) {
+  var methodName = publicMethods[i];
+  methods[methodName] = getMethod(methodName);
+}
+
+function runner(method) {
+  if (method === 'status') {
+    return sidrStatus;
+  } else if (methods[method]) {
+    return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+  } else if (typeof method === 'function' || typeof method === 'string' || !method) {
+    return methods.toggle.apply(this, arguments);
+  } else {
+    console.error('Method ' + method + ' does not exist on sidr');
+  }
+}
+
 var Button = function (_BaseElement) {
   inherits(Button, _BaseElement);
 
@@ -687,35 +708,32 @@ var Button = function (_BaseElement) {
   return Button;
 }(BaseElement);
 
-var defaultOptions = {
-  name: 'sidr', // Name for the 'sidr'
-  speed: 200, // Accepts standard jQuery effects speeds (i.e. fast, normal or milliseconds)
-  side: 'left', // Accepts 'left' or 'right'
-  source: null, // Override the source of the content.
-  renaming: true, // The ids and classes will be prepended with a prefix when loading existent content
-  body: 'body', // Page container selector,
-  displace: true, // Displace the body content or not
-  timing: 'ease', // Timing function for CSS transitions
-  method: 'toggle', // The method to call when element is clicked
-  bind: 'click', // The event to trigger the menu
-  onOpen: function onOpen() {},
-  // Callback when sidr start opening
-  onClose: function onClose() {},
-  // Callback when sidr start closing
-  onOpenEnd: function onOpenEnd() {},
-  // Callback when sidr end opening
-  onCloseEnd: function onCloseEnd() {} // Callback when sidr end closing
+var sidr = {
+  new: function _new(selector, options) {
+    var settings = utils.extend(defaultOptions, options);
+    var buttons = dom.qsa(selector);
 
+    store$1.add(settings.name, new Menu(settings));
+    for (var i = 0; i < buttons.length; i++) {
+      new Button(buttons[i], settings);
+    }
+  },
+  status: function status() {
+    return runner.apply(undefined, ['status'].concat(Array.prototype.slice.call(arguments)));
+  },
+  reload: function reload() {
+    return runner.apply(undefined, ['reload'].concat(Array.prototype.slice.call(arguments)));
+  },
+  close: function close() {
+    return runner.apply(undefined, ['close'].concat(Array.prototype.slice.call(arguments)));
+  },
+  open: function open() {
+    return runner.apply(undefined, ['open'].concat(Array.prototype.slice.call(arguments)));
+  },
+  toggle: function toggle() {
+    return runner.apply(undefined, ['toggle'].concat(Array.prototype.slice.call(arguments)));
+  }
 };
-
-function fnSidr(options) {
-  var settings = utils.extend(defaultOptions, options);
-  store$1.add(settings.name, new Menu(settings));
-
-  return this.each(function () {
-    new Button(this, settings);
-  });
-}
 
 /*
  * Sidr
@@ -725,7 +743,6 @@ function fnSidr(options) {
  * Licensed under the MIT license.
  */
 
-jQuery.sidr = runner;
-jQuery.fn.sidr = fnSidr;
+window.sidr = sidr;
 
 }());

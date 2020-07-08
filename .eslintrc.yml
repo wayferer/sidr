@@ -1,0 +1,15 @@
+extends: standard
+
+rules:
+  no-new: 0
+
+env:
+  browser: true
+  es6: true
+  jquery: true
+  node: true
+  mocha: true
+
+globals:
+  sinon: true
+  should: true

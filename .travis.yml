@@ -1,0 +1,21 @@
+sudo: false
+language: node_js
+node_js:
+- "8"
+before_script:
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then chmod +x ./cc-test-reporter; fi
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter before-build; fi
+script: npm run dist
+after_script:
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --coverage-input-type lcov --exit-code $TRAVIS_TEST_RESULT; fi
+notifications:
+  email: false
+deploy:
+  provider: npm
+  email: alberto@berriart.com
+  api_key:
+    secure: Ogy1KCQTITD+DgAFnIfyjuT6o+zXv2+WFP1XRpOLu18s3eoyppP83Kf+XwHJE/CbyAj+LfagFK1aF7W6TWnihaoppaBB2HIN5a7xjIR4kaw9Gl1v/p4nAKU1EE/SP3LPaicZYKTxZqBC+yrJeqDZc1AfXsDXSqbJHgKPAGuav6w=
+  on:
+    tags: true
+    repo: artberri/sidr

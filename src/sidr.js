@@ -6,8 +6,6 @@
  * Licensed under the MIT license.
  */
 
-import runner from './js/runner'
-import fnSidr from './js/jquery.fnSidr'
+import sidr from './js/sidr'
 
-jQuery.sidr = runner
-jQuery.fn.sidr = fnSidr
+window.sidr = sidr
